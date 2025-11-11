@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useAppContext } from '@/lib/store/context';
+import { getLinkedHeadingsForObjective } from '@/lib/store/selectors';
 import { ObjectiveForm } from './ObjectiveForm';
 import { ConfirmDialog } from './ConfirmDialog';
+import { LinkHeadingsDialog } from './LinkHeadingsDialog';
 import type { Objective } from '@/types/schema';
 
 interface ObjectiveListProps {
@@ -17,6 +20,8 @@ export function ObjectiveList({ sectionId }: ObjectiveListProps) {
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending'>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [objectiveToDelete, setObjectiveToDelete] = useState<string | null>(null);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [objectiveToLink, setObjectiveToLink] = useState<string | null>(null);
 
   const section = state.sections.find((s) => s.id === sectionId);
   if (!section) return null;
@@ -132,8 +137,34 @@ export function ObjectiveList({ sectionId }: ObjectiveListProps) {
                       {objective.description && (
                         <p className="text-sm text-gray-600 mt-1 ml-8">{objective.description}</p>
                       )}
+                      {(() => {
+                        const linkedHeadings = getLinkedHeadingsForObjective(state, sectionId, objective.id);
+                        return linkedHeadings.length > 0 ? (
+                          <div className="ml-8 mt-2 flex flex-wrap gap-2">
+                            {linkedHeadings.map((heading) => (
+                              <Link
+                                key={heading.id}
+                                href={`/case-study?anchor=${heading.id}`}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs hover:bg-blue-100 transition-colors"
+                              >
+                                <span className="text-blue-400">#{'#'.repeat(heading.level)}</span>
+                                <span>{heading.text}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        ) : null;
+                      })()}
                     </div>
                     <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={() => {
+                          setObjectiveToLink(objective.id);
+                          setLinkDialogOpen(true);
+                        }}
+                        className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                      >
+                        Link
+                      </button>
                       <button
                         onClick={() => setEditingId(objective.id)}
                         className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
@@ -204,6 +235,17 @@ export function ObjectiveList({ sectionId }: ObjectiveListProps) {
         confirmLabel="Delete"
         confirmVariant="danger"
       />
+      {objectiveToLink && (
+        <LinkHeadingsDialog
+          isOpen={linkDialogOpen}
+          onClose={() => {
+            setLinkDialogOpen(false);
+            setObjectiveToLink(null);
+          }}
+          sectionId={sectionId}
+          objectiveId={objectiveToLink}
+        />
+      )}
     </div>
   );
 }

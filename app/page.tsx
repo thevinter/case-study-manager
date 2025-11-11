@@ -34,6 +34,12 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold text-gray-900">UX Case Study Builder</h1>
             <nav className="flex gap-4">
               <Link
+                href="/case-study"
+                className="text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-3 py-1"
+              >
+                Case Study
+              </Link>
+              <Link
                 href="/sections"
                 className="text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-3 py-1"
               >

@@ -50,8 +50,29 @@ export interface Section {
   updatedAt: string;
 }
 
+export interface Heading {
+  id: string;
+  level: number;
+  text: string;
+  line: number;
+}
+
+export interface CaseStudy {
+  content: string;
+  headingIndex: Heading[];
+  updatedAt: string;
+}
+
+export interface ObjectiveHeadingLink {
+  sectionId: string;
+  objectiveId: string;
+  headingId: string;
+}
+
 export interface AppState {
   version: 1;
   sections: Section[];
+  caseStudy?: CaseStudy;
+  objectiveHeadingLinks?: ObjectiveHeadingLink[];
 }
 

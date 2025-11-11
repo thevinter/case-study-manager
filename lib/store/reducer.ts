@@ -1,4 +1,4 @@
-import type { AppState, Section, Objective, Deliverable } from '@/types/schema';
+import type { AppState, Section, Objective, Deliverable, ObjectiveHeadingLink } from '@/types/schema';
 import type { AppAction } from '@/types/actions';
 import type { ChecklistItem } from '@/types/schema';
 
@@ -55,9 +55,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
 
     case 'DELETE_SECTION': {
+      const links = state.objectiveHeadingLinks || [];
       return {
         ...state,
         sections: state.sections.filter((s) => s.id !== action.payload.id),
+        objectiveHeadingLinks: links.filter((l) => l.sectionId !== action.payload.id),
       };
     }
 
@@ -123,6 +125,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         objectives: section.objectives.filter((o) => o.id !== action.payload.objectiveId),
       });
 
+      const links = state.objectiveHeadingLinks || [];
       return {
         ...state,
         sections: [
@@ -130,6 +133,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           updated,
           ...state.sections.slice(sectionIndex + 1),
         ],
+        objectiveHeadingLinks: links.filter(
+          (l) => !(l.sectionId === action.payload.sectionId && l.objectiveId === action.payload.objectiveId)
+        ),
       };
     }
 
@@ -324,8 +330,42 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
+    case 'UPDATE_CASE_STUDY': {
+      return {
+        ...state,
+        caseStudy: {
+          content: action.payload.content,
+          headingIndex: action.payload.headingIndex,
+          updatedAt: new Date().toISOString(),
+        },
+        objectiveHeadingLinks: (state.objectiveHeadingLinks || []).filter((link) =>
+          action.payload.headingIndex.some((h) => h.id === link.headingId)
+        ),
+      };
+    }
+
+    case 'LINK_OBJECTIVE_HEADINGS': {
+      const existingLinks = state.objectiveHeadingLinks || [];
+      const otherLinks = existingLinks.filter(
+        (l) => !(l.sectionId === action.payload.sectionId && l.objectiveId === action.payload.objectiveId)
+      );
+      const newLinks: ObjectiveHeadingLink[] = action.payload.headingIds.map((headingId) => ({
+        sectionId: action.payload.sectionId,
+        objectiveId: action.payload.objectiveId,
+        headingId,
+      }));
+      return {
+        ...state,
+        objectiveHeadingLinks: [...otherLinks, ...newLinks],
+      };
+    }
+
     case 'IMPORT_STATE': {
-      return action.payload.state;
+      return {
+        ...action.payload.state,
+        caseStudy: action.payload.state.caseStudy,
+        objectiveHeadingLinks: action.payload.state.objectiveHeadingLinks || [],
+      };
     }
 
     case 'RESET_STATE': {

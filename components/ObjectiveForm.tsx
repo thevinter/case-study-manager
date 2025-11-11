@@ -165,25 +165,13 @@ export function ObjectiveForm({ objective, mode = 'edit', onSave, onCancel }: Ob
       return (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Checklist Items</label>
-          <div className="space-y-2">
+          <ul className="list-disc list-inside space-y-1">
             {checklistItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={item.done}
-                  onChange={(e) => {
-                    updateChecklistItem(item.id, { done: e.target.checked });
-                    setTimeout(handleViewModeSave, 0);
-                  }}
-                  className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                  aria-label={item.label}
-                />
-                <span className={item.done ? 'line-through text-gray-500' : 'text-gray-900'}>
-                  {item.label}
-                </span>
-              </div>
+              <li key={item.id} className={item.done ? 'line-through text-gray-500' : 'text-gray-900'}>
+                {item.label}
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       );
     }

@@ -1,4 +1,4 @@
-import type { AppState, Section, Objective } from '@/types/schema';
+import type { AppState, Section, Objective, Heading, ObjectiveHeadingLink } from '@/types/schema';
 
 export function getProgress(state: AppState): {
   totalSections: number;
@@ -83,5 +83,40 @@ export function getMissingSteps(state: AppState): Array<{ section: Section; obje
       });
   }
   return missing;
+}
+
+export function getCaseStudyHeadings(state: AppState): Heading[] {
+  return state.caseStudy?.headingIndex || [];
+}
+
+export function getObjectiveHeadingLinks(state: AppState, sectionId: string, objectiveId: string): ObjectiveHeadingLink[] {
+  const links = state.objectiveHeadingLinks || [];
+  return links.filter((link) => link.sectionId === sectionId && link.objectiveId === objectiveId);
+}
+
+export function getLinkedHeadingsForObjective(state: AppState, sectionId: string, objectiveId: string): Heading[] {
+  const links = getObjectiveHeadingLinks(state, sectionId, objectiveId);
+  const headings = getCaseStudyHeadings(state);
+  const headingMap = new Map(headings.map((h) => [h.id, h]));
+  return links.map((link) => headingMap.get(link.headingId)).filter((h): h is Heading => h !== undefined);
+}
+
+export function getObjectivesForHeading(state: AppState, headingId: string): Array<{ section: Section; objective: Objective }> {
+  const links = state.objectiveHeadingLinks || [];
+  const matchingLinks = links.filter((link) => link.headingId === headingId);
+  const sectionMap = new Map(state.sections.map((s) => [s.id, s]));
+  const results: Array<{ section: Section; objective: Objective }> = [];
+  
+  matchingLinks.forEach((link) => {
+    const section = sectionMap.get(link.sectionId);
+    if (section) {
+      const objective = section.objectives.find((o) => o.id === link.objectiveId);
+      if (objective) {
+        results.push({ section, objective });
+      }
+    }
+  });
+  
+  return results;
 }
 

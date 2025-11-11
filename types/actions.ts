@@ -1,4 +1,4 @@
-import type { Section, Objective, Deliverable } from './schema';
+import type { Section, Objective, Deliverable, AppState, Heading, ChecklistItem } from './schema';
 
 export type AppAction =
   | { type: 'ADD_SECTION'; payload: Section }
@@ -14,6 +14,8 @@ export type AppAction =
   | { type: 'DELETE_DELIVERABLE'; payload: { sectionId: string; deliverableId: string } }
   | { type: 'TOGGLE_DELIVERABLE_COMPLETE'; payload: { sectionId: string; deliverableId: string } }
   | { type: 'REORDER_SECTIONS'; payload: { sectionIds: string[] } }
+  | { type: 'UPDATE_CASE_STUDY'; payload: { content: string; headingIndex: Heading[] } }
+  | { type: 'LINK_OBJECTIVE_HEADINGS'; payload: { sectionId: string; objectiveId: string; headingIds: string[] } }
   | { type: 'IMPORT_STATE'; payload: { state: AppState } }
   | { type: 'RESET_STATE' };
 
